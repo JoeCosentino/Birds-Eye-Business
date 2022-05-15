@@ -62,4 +62,34 @@ function viewAllEmployees() {
     })
 }
 
+function addDepartmentPrompt() {
+    return inquirer.prompt([{
+        tpye: 'text',
+        name: 'departmentName',
+        message: 'Please enter the name of the department you wish to add',
+        validate: departmentNameInput => {
+            if (departmentNameInput) {
+                return true;
+            } else {
+                console.log('Please enter the department name!');
+                return false;
+            }
+        }
+    }])
+    .then(({ departmentName }) => {
+        const sql = `INSERT INTO department (name)
+                     VALUES (${departmentName})`;
+        db.connect(err => {
+            if (err) throw err;
+            db.query(sql, (err, result) => {
+                if (err) throw err;
+                console.table(result);
+            })
+        })
+    })
+}
+
+// const sql = `UPDATE voters SET email = ? WHERE id = ?`;
+//     const params = [req.body.email, req.params.id];
+
 beginSelection();
