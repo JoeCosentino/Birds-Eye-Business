@@ -25,6 +25,8 @@ function beginSelection () {
             viewAllEmployees();
         } else if (menu === 'add a department') {
             addDepartmentPrompt();
+        } else if (menu === 'add a role') {
+            addRolePrompt();
         }
     });
 }
@@ -37,7 +39,8 @@ function viewAllDepartments() {
             if (err) throw err;
             console.table(result);
         });
-    });
+    })
+    beginSelection();
 }
 
 function viewAllRoles() {
@@ -49,6 +52,7 @@ function viewAllRoles() {
             console.table(result);
         });
     });
+    beginSelection();
 }
 
 function viewAllEmployees() {
@@ -59,7 +63,8 @@ function viewAllEmployees() {
             if (err) throw err;
             console.table(result);
         })
-    })
+    });
+    beginSelection();
 }
 
 function addDepartmentPrompt() {
@@ -77,16 +82,62 @@ function addDepartmentPrompt() {
         }
     }])
     .then(({ departmentName }) => {
-        const sql = `INSERT INTO department (name)
-                     VALUES`;
-        const values = `(${departmentName})`;
+        const sql = `INSERT INTO department (name) VALUES ('${departmentName}')`;
         db.connect(err => {
             if (err) throw err;
-            db.query(sql, values, (err, result) => {
+            db.query(sql, (err, result) => {
                 if (err) throw err;
-                console.table(result);
+                beginSelection();
             })
         })
+    })
+
+}
+
+function addRolePrompt() {
+    return inquirer.prompt([
+        {
+            tpye: 'text',
+            name: 'roleName',
+            message: 'Please enter the name of the role',
+            validate: roleNameInput => {
+                if (roleNameInput) {
+                    return true;
+                } else {
+                    console.log('Please enter the name of the role!');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'text',
+            name: 'salary',
+            message: 'Please enter the salary for this role',
+            validate: salaryInput => {
+                if (salaryInput) {
+                    return true;
+                } else {
+                    console.log('Please enter a salary for this role!');
+                    return false;
+                }
+            }
+        },
+        {
+            type: 'text',
+            name: 'departmentRole',
+            message: 'Please enter the corresponding department for this role',
+            validate: departmentRoleInput => {
+                if (departmentRoleInput) {
+                    return true;
+                } else {
+                    console.log('Please enter a department for this role!');
+                    return false;
+                }
+            }
+        }
+    ])
+    .then(({ roleName, salary, departmentRole }) => {
+        
     })
 }
 
