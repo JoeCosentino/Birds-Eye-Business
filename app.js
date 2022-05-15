@@ -78,10 +78,11 @@ function addDepartmentPrompt() {
     }])
     .then(({ departmentName }) => {
         const sql = `INSERT INTO department (name)
-                     VALUES (${departmentName})`;
+                     VALUES`;
+        const values = `(${departmentName})`;
         db.connect(err => {
             if (err) throw err;
-            db.query(sql, (err, result) => {
+            db.query(sql, values, (err, result) => {
                 if (err) throw err;
                 console.table(result);
             })
