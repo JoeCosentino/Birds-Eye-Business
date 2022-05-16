@@ -25,7 +25,8 @@ function beginSelection () {
             viewAllEmployees();
         } else if (menu === 'add a department') {
             addDepartmentPrompt();
-        } else if (menu === 'add a role') {
+        } 
+        else if (menu === 'add a role') {
             addRolePrompt();
         }
     });
@@ -40,7 +41,7 @@ function viewAllDepartments() {
             console.table(result);
         });
     })
-    beginSelection();
+    // beginSelection();
 }
 
 function viewAllRoles() {
@@ -52,7 +53,6 @@ function viewAllRoles() {
             console.table(result);
         });
     });
-    beginSelection();
 }
 
 function viewAllEmployees() {
@@ -64,7 +64,6 @@ function viewAllEmployees() {
             console.table(result);
         })
     });
-    beginSelection();
 }
 
 function addDepartmentPrompt() {
@@ -87,7 +86,7 @@ function addDepartmentPrompt() {
             if (err) throw err;
             db.query(sql, (err, result) => {
                 if (err) throw err;
-                beginSelection();
+                // beginSelection();
             })
         })
     })
@@ -98,10 +97,10 @@ function addRolePrompt() {
     return inquirer.prompt([
         {
             tpye: 'text',
-            name: 'roleName',
+            name: 'title',
             message: 'Please enter the name of the role',
-            validate: roleNameInput => {
-                if (roleNameInput) {
+            validate: titleInput => {
+                if (titleInput) {
                     return true;
                 } else {
                     console.log('Please enter the name of the role!');
@@ -123,9 +122,10 @@ function addRolePrompt() {
             }
         },
         {
-            type: 'text',
+            type: 'list',
             name: 'departmentRole',
-            message: 'Please enter the corresponding department for this role',
+            message: 'Please choose the corresponding department for this role',
+            choices: ['accounting', 'marketing', 'legal'],
             validate: departmentRoleInput => {
                 if (departmentRoleInput) {
                     return true;
@@ -136,9 +136,17 @@ function addRolePrompt() {
             }
         }
     ])
-    .then(({ roleName, salary, departmentRole }) => {
-        
-    })
+    .then(({ title, salary, departmentRole }) => {
+        const sql = `INSERT INTO roles (title, salary, department_id)
+                     VALUES ('${title}', '${salary}', '${departmentRole}')`
+        db.connect(err => {
+            if (err) throw err;
+            db.query(sql, (err, result) => {
+                if (err) throw err;
+                // beginSelection();
+            });
+        });
+    });
 }
 
 // const sql = `UPDATE voters SET email = ? WHERE id = ?`;
