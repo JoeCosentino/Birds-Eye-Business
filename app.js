@@ -1,6 +1,9 @@
 const inquirer = require('inquirer');
 const db = require('./db/connection');
 const consoleTable = require('console.table');
+const util = require('util');
+
+db.query = util.promisify(db.query);
 
 function beginSelection () {
     return inquirer.prompt([{
@@ -41,7 +44,7 @@ function viewAllDepartments() {
             console.table(result);
         });
     })
-    // beginSelection();
+    beginSelection();
 }
 
 function viewAllRoles() {
@@ -94,6 +97,14 @@ function addDepartmentPrompt() {
 }
 
 function addRolePrompt() {
+    const sql = `SELECT * FROM department;` 
+    db.promise().query(sql)
+    .then(([rows]) =>{
+        let departments = rows;
+        const departmentChoices = departments.map(({ id, name }) =>({
+            name: name,
+            value: id
+        }))
     return inquirer.prompt([
         {
             tpye: 'text',
@@ -125,7 +136,7 @@ function addRolePrompt() {
             type: 'list',
             name: 'departmentRole',
             message: 'Please choose the corresponding department for this role',
-            choices: ['accounting', 'marketing', 'legal'],
+            choices: departmentChoices,
             validate: departmentRoleInput => {
                 if (departmentRoleInput) {
                     return true;
@@ -143,10 +154,11 @@ function addRolePrompt() {
             if (err) throw err;
             db.query(sql, (err, result) => {
                 if (err) throw err;
-                // beginSelection();
+                beginSelection();
             });
         });
     });
+})
 }
 
 // const sql = `UPDATE voters SET email = ? WHERE id = ?`;
