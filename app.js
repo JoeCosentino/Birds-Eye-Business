@@ -2,6 +2,7 @@ const inquirer = require('inquirer');
 const db = require('./db/connection');
 const consoleTable = require('console.table');
 const util = require('util');
+const { devNull } = require('os');
 
 db.query = util.promisify(db.query);
 
@@ -11,26 +12,30 @@ function beginSelection () {
         name: 'menu',
         message: 'Please choose one of the following options:',
         choices: [
-            'view all departments',
-            'view all roles',
-            'view all employees',
-            'add a department',
-            'add a role',
-            'add an employee'
+            'View all departments',
+            'View all roles',
+            'View all employees',
+            'Add a department',
+            'Add a role',
+            'Add an employee',
+            'Update an employee role'
         ]
     }])
     .then(({ menu }) => {
-        if(menu === 'view all departments') {
+        if(menu === 'View all departments') {
             viewAllDepartments();
-        } else if (menu === 'view all roles') {
+        } else if (menu === 'View all roles') {
             viewAllRoles();
-        } else if (menu === 'view all employees') {
+        } else if (menu === 'View all employees') {
             viewAllEmployees();
-        } else if (menu === 'add a department') {
+        } else if (menu === 'Add a department') {
             addDepartmentPrompt();
-        } 
-        else if (menu === 'add a role') {
+        } else if (menu === 'Add a role') {
             addRolePrompt();
+        } else if (menu === 'Add an employee') {
+            addEmployeePrompt();
+        } else if (menu === 'Update an employee role') {
+            updateEmployeeRole();
         }
     });
 }
@@ -105,7 +110,7 @@ function addRolePrompt() {
             name: name,
             value: id
         }))
-    return inquirer.prompt([
+        return inquirer.prompt([
         {
             tpye: 'text',
             name: 'title',
@@ -137,14 +142,6 @@ function addRolePrompt() {
             name: 'departmentRole',
             message: 'Please choose the corresponding department for this role',
             choices: departmentChoices,
-            validate: departmentRoleInput => {
-                if (departmentRoleInput) {
-                    return true;
-                } else {
-                    console.log('Please enter a department for this role!');
-                    return false;
-                }
-            }
         }
     ])
     .then(({ title, salary, departmentRole }) => {
@@ -161,7 +158,99 @@ function addRolePrompt() {
 })
 }
 
-// const sql = `UPDATE voters SET email = ? WHERE id = ?`;
+function addEmployeePrompt() {
+    const sql = `SELECT * FROM roles;`
+    db.promise().query(sql)
+    .then(([rows]) => {
+        let roles = rows;
+        const rolesChoices = roles.map(({ id, title }) =>({
+            name: title,
+            value: id
+        }))
+        return inquirer.prompt([
+            {
+                tpye: 'text',
+                name: 'firstName',
+                message: 'Please enter the first name of the employee',
+                validate: firstNameInput => {
+                    if (firstNameInput) {
+                        return true;
+                    } else {
+                        console.log('Please enter the first name of the employee!');
+                        return false;
+                    }
+                }
+            },
+            {
+                type: 'text',
+                name: 'lastName',
+                message: 'Please enter the last name of the employee',
+                validate: lastNameInput => {
+                    if (lastNameInput) {
+                        return true;
+                    } else {
+                        console.log('Please enter the last name of the employee!');
+                        return false;
+                    }
+                }
+            },
+            {
+                type: 'list',
+                name: 'role',
+                message: 'Please choose the role for this employee',
+                choices: rolesChoices
+            },
+            {
+                type: 'text',
+                name: 'manager',
+                message: 'Please enter the first and last name of the employees manager',
+                validate: managerInput => {
+                    if (managerInput) {
+                        return true;
+                    } else {
+                        console.log('Please enter the managers name');
+                        return false;
+                    }
+                }
+            }
+        ])
+        .then(({ firstName, lastName, role, manager }) => {
+            const sql = `INSERT INTO employees (first_name, last_name, role_id, reporting_manager)
+                         VALUES ('${firstName}', '${lastName}', '${role}', '${manager}');`
+            db.connect(err => {
+                if (err) throw err;
+                db.query(sql, (err, result) => {
+                    if (err) throw err;
+                    beginSelection();
+                });
+            });
+        });
+    });
+}
+
+function updateEmployeeRole() {
+    const sql = `SELECT * FROM employees;`
+    db.promise().query(sql)
+    .then(([rows]) => {
+        let employees = rows;
+        const employeeNames = employees.map(({ id, first_name, last_name }) =>({
+            name: first_name, last_name,
+            value: id
+        }))
+        return inquirer.prompt([
+            {
+                type: 'list',
+                name: 'chooseEmployee',
+                message: 'Please choose the employee whose role you would like to update',
+                choices: employeeNames
+            }      
+        ])
+        // .then(({ chooseEmployee }))
+    })
+
+}
+
+//     const sql = `UPDATE voters SET email = ? WHERE id = ?`;
 //     const params = [req.body.email, req.params.id];
 
 beginSelection();
