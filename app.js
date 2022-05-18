@@ -61,6 +61,7 @@ function viewAllRoles() {
             console.table(result);
         });
     });
+    beginSelection();
 }
 
 function viewAllEmployees() {
@@ -72,6 +73,7 @@ function viewAllEmployees() {
             console.table(result);
         })
     });
+    beginSelection();
 }
 
 function addDepartmentPrompt() {
@@ -94,10 +96,11 @@ function addDepartmentPrompt() {
             if (err) throw err;
             db.query(sql, (err, result) => {
                 if (err) throw err;
-                // beginSelection();
+                beginSelection();
             })
         })
     })
+    
 
 }
 
@@ -244,12 +247,40 @@ function updateEmployeeRole() {
                 message: 'Please choose the employee whose role you would like to update',
                 choices: employeeNames
             }      
-        ])
-        .then(({ chooseEmployee }) => {
-            
-        })
-    })
+        
+        ]);
+        
+    }).then(roleForUpdatedEmployee)
+}
 
+function roleForUpdatedEmployee() {
+    db.promise().query(`SELECT * FROM roles;`)
+    .then(([rows]) => {
+        let roles = rows;
+        const rolesChoices = roles.map(({ id, title }) => ({
+            name: title,
+            value: id
+        }))
+        return inquirer.prompt([
+            {
+                type: 'list',
+                name: 'chooseUpdatedRole',
+                message: 'Please choose a role to update for the employee',
+                choices: rolesChoices
+            }
+        ])
+        .then(({ chooseUpdatedRole }) => {
+            const sql = `UPDATE employees SET role_id = '${chooseUpdatedRole}' where id = ?;`;
+            const params = '';
+            db.connect(err => {
+                if (err) throw err;
+                db.query(sql, (err, result) => {
+                    if (err) throw err;
+                    beginSelection();
+                });
+            });
+        })
+    });
 }
 
 //     const sql = `UPDATE voters SET email = ? WHERE id = ?`;
