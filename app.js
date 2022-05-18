@@ -234,7 +234,7 @@ function updateEmployeeRole() {
     .then(([rows]) => {
         let employees = rows;
         const employeeNames = employees.map(({ id, first_name, last_name }) =>({
-            name: first_name, last_name,
+            name: `${first_name} ${last_name}`,
             value: id
         }))
         return inquirer.prompt([
@@ -245,7 +245,9 @@ function updateEmployeeRole() {
                 choices: employeeNames
             }      
         ])
-        // .then(({ chooseEmployee }))
+        .then(({ chooseEmployee }) => {
+            
+        })
     })
 
 }
