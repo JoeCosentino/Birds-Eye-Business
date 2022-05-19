@@ -45,7 +45,7 @@ function finishSelection() {
         {
             type: 'confirm',
             name: 'finish',
-            message: 'press finish to finish'
+            message: 'Press enter to finish'
         }
     ])
     .then((answer) => {
@@ -60,9 +60,10 @@ function viewAllDepartments() {
         db.query(sql, (err, result) => {
             if (err) throw err;
             console.table(result);
+            finishSelection();
         });
     })
-    finishSelection();
+    
 }
 
 function viewAllRoles() {
@@ -72,9 +73,10 @@ function viewAllRoles() {
         db.query(sql, (err, result) => {
             if (err) throw err;
             console.table(result);
+            finishSelection();
         });
     });
-    beginSelection();
+    
 }
 
 function viewAllEmployees() {
@@ -84,9 +86,10 @@ function viewAllEmployees() {
         db.query(sql, (err, result) => {
             if (err) throw err;
             console.table(result);
+            finishSelection();
         })
     });
-    beginSelection();
+    
 }
 
 function addDepartmentPrompt() {
@@ -109,7 +112,7 @@ function addDepartmentPrompt() {
             if (err) throw err;
             db.query(sql, (err, result) => {
                 if (err) throw err;
-                beginSelection();
+                finishSelection();
             })
         })
     })
@@ -121,11 +124,14 @@ function addRolePrompt() {
     const sql = `SELECT * FROM department;` 
     db.promise().query(sql)
     .then(([rows]) =>{
+        console.log(rows);
         let departments = rows;
         const departmentChoices = departments.map(({ id, name }) =>({
             name: name,
             value: id
         }))
+        console.log('==============');
+        console.log(departmentChoices);
         return inquirer.prompt([
         {
             tpye: 'text',
@@ -167,7 +173,7 @@ function addRolePrompt() {
             if (err) throw err;
             db.query(sql, (err, result) => {
                 if (err) throw err;
-                beginSelection();
+                finishSelection();
             });
         });
     });
@@ -178,11 +184,14 @@ function addEmployeePrompt() {
     const sql = `SELECT * FROM roles;`
     db.promise().query(sql)
     .then(([rows]) => {
+        console.log(rows);
         let roles = rows;
         const rolesChoices = roles.map(({ id, title }) =>({
             name: title,
             value: id
         }))
+        console.log('============');
+        console.log(rolesChoices);
         return inquirer.prompt([
             {
                 tpye: 'text',
@@ -214,7 +223,7 @@ function addEmployeePrompt() {
                 type: 'list',
                 name: 'role',
                 message: 'Please choose the role for this employee',
-                choices: rolesChoices
+                choices: rolesChoices,
             },
             {
                 type: 'text',
@@ -237,7 +246,7 @@ function addEmployeePrompt() {
                 if (err) throw err;
                 db.query(sql, (err, result) => {
                     if (err) throw err;
-                    beginSelection();
+                    finishSelection();
                 });
             });
         });
@@ -265,6 +274,7 @@ function updateEmployeeRole() {
         .then(({ chooseEmployee }) => {
             var data = chooseEmployee;
             roleForUpdatedEmployee(data);
+            console.log(data);
         });
         
     });
@@ -293,7 +303,7 @@ function roleForUpdatedEmployee(data) {
                 if (err) throw err;
                 db.query(sql, (err, result) => {
                     if (err) throw err;
-                    beginSelection();
+                    finishSelection();
                 });
             });
         })
