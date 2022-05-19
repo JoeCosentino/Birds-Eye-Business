@@ -271,7 +271,7 @@ function roleForUpdatedEmployee() {
         ])
         .then(({ chooseUpdatedRole }) => {
             const sql = `UPDATE employees SET role_id = '${chooseUpdatedRole}' where id = ?;`;
-            const params = '';
+            // const params = [req.params.id];
             db.connect(err => {
                 if (err) throw err;
                 db.query(sql, (err, result) => {
