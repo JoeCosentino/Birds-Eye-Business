@@ -40,6 +40,19 @@ function beginSelection () {
     });
 }
 
+function finishSelection() {
+    return inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'finish',
+            message: 'press finish to finish'
+        }
+    ])
+    .then((answer) => {
+        if (answer.finish) return beginSelection();
+    });
+}
+
 function viewAllDepartments() {
     const sql = `SELECT * FROM department`;
     db.connect(err => {
@@ -49,7 +62,7 @@ function viewAllDepartments() {
             console.table(result);
         });
     })
-    beginSelection();
+    finishSelection();
 }
 
 function viewAllRoles() {
@@ -236,7 +249,7 @@ function updateEmployeeRole() {
     db.promise().query(sql)
     .then(([rows]) => {
         let employees = rows;
-        const employeeNames = employees.map(({ id, first_name, last_name }) =>({
+        var employeeNames = employees.map(({ id, first_name, last_name }) =>({
             name: `${first_name} ${last_name}`,
             value: id
         }))
@@ -248,12 +261,16 @@ function updateEmployeeRole() {
                 choices: employeeNames
             }      
         
-        ]);
+        ])
+        .then(({ chooseEmployee }) => {
+            var data = chooseEmployee;
+            roleForUpdatedEmployee(data);
+        });
         
-    }).then(roleForUpdatedEmployee)
+    });
 }
 
-function roleForUpdatedEmployee() {
+function roleForUpdatedEmployee(data) {
     db.promise().query(`SELECT * FROM roles;`)
     .then(([rows]) => {
         let roles = rows;
@@ -270,7 +287,7 @@ function roleForUpdatedEmployee() {
             }
         ])
         .then(({ chooseUpdatedRole }) => {
-            const sql = `UPDATE employees SET role_id = '${chooseUpdatedRole}' where id = ?;`;
+            const sql = `UPDATE employees SET role_id = '${chooseUpdatedRole}' where id = '${data}';`;
             // const params = [req.params.id];
             db.connect(err => {
                 if (err) throw err;
