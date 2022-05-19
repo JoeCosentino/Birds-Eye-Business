@@ -80,7 +80,7 @@ function viewAllRoles() {
 }
 
 function viewAllEmployees() {
-    const sql = `SELECT * FROM employees LEFT JOIN roles ON employees.role_id = roles.id;`;
+    const sql = `SELECT * FROM employees;`;
     db.connect(err => {
         if (err) throw err;
         db.query(sql, (err, result) => {
@@ -124,14 +124,14 @@ function addRolePrompt() {
     const sql = `SELECT * FROM department;` 
     db.promise().query(sql)
     .then(([rows]) =>{
-        console.log(rows);
+        // console.log(rows);
         let departments = rows;
         const departmentChoices = departments.map(({ id, name }) =>({
             name: name,
             value: id
         }))
-        console.log('==============');
-        console.log(departmentChoices);
+        // console.log('==============');
+        // console.log(departmentChoices);
         return inquirer.prompt([
         {
             tpye: 'text',
@@ -184,14 +184,14 @@ function addEmployeePrompt() {
     const sql = `SELECT * FROM roles;`
     db.promise().query(sql)
     .then(([rows]) => {
-        console.log(rows);
+        // console.log(rows);
         let roles = rows;
         const rolesChoices = roles.map(({ id, title }) =>({
             name: title,
             value: id
         }))
-        console.log('============');
-        console.log(rolesChoices);
+        // console.log('============');
+        // console.log(rolesChoices);
         return inquirer.prompt([
             {
                 tpye: 'text',
@@ -274,7 +274,7 @@ function updateEmployeeRole() {
         .then(({ chooseEmployee }) => {
             var data = chooseEmployee;
             roleForUpdatedEmployee(data);
-            console.log(data);
+            // console.log(data);
         });
         
     });
